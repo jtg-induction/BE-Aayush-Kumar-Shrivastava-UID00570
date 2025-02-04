@@ -408,17 +408,14 @@ def fetch_user_wise_project_status():
         to_do_projects=ArrayAgg(
             'projectmember__project__name',
             filter=Q(projectmember__project__status=0),
-            distinct=True
         ),
         in_progress_projects=ArrayAgg(
             'projectmember__project__name',
             filter=Q(projectmember__project__status=1),
-            distinct=True
         ),
         completed_projects=ArrayAgg(
             'projectmember__project__name',
             filter=Q(projectmember__project__status=2),
-            distinct=True
         ),
     )
 
