@@ -1,10 +1,8 @@
-from django.contrib.auth import authenticate
-from django.contrib.auth import get_user_model
-from django.contrib.auth.hashers import make_password
-from django.utils.translation import gettext_lazy as _
-
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
+
 from users.models import CustomUser
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -39,3 +37,37 @@ class UserWiseProjectStatusSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['first_name', 'last_name', 'email', 'to_do_projects',
                   'in_progress_projects', 'completed_projects']
+
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name',
+                  'email', 'password', 'date_joined']
+        read_only_fields = ['date_joined']
+        write_only_fields = ['password']
+
+    def validate_email(self, value):
+        if CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                "A user with this email already exists.")
+
+        return value
+
+    def create(self, validated_data):
+        user = CustomUser.objects.create_user(
+            email=validated_data['email'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            password=validated_data['password']
+        )
+
+        return user
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        token, _ = Token.objects.get_or_create(user=instance)
+        representation['token'] = token.key
+
+        return representation
