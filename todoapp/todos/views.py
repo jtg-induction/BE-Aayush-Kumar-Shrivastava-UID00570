@@ -1,9 +1,8 @@
-from django.db.models import Q  
-
 from rest_framework.viewsets import ModelViewSet 
 
-from .serializers import TodoAPICreateSerializer, TodoAPIResponseSerializer
 from .models import Todo
+from .serializers import TodoAPICreateSerializer, TodoAPIResponseSerializer
+
 
 class TodoAPIViewSet(ModelViewSet):
     """
