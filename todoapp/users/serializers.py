@@ -16,8 +16,9 @@ class UserTodoStatsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'first_name', 'last_name',
-                  'email', 'completed_count', 'pending_count']
+        fields = [
+            'id', 'first_name', 'last_name', 'email', 'completed_count', 'pending_count'
+        ]
 
 
 class PendingTodosSerializer(serializers.ModelSerializer):
@@ -40,13 +41,13 @@ class UserWiseProjectStatusSerializer(serializers.ModelSerializer):
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
 
     class Meta:
         model = CustomUser
         fields = ['first_name', 'last_name',
                   'email', 'password', 'date_joined']
         read_only_fields = ['date_joined']
-        write_only_fields = ['password']
 
     def validate_email(self, value):
         if CustomUser.objects.filter(email=value).exists():
