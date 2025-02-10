@@ -15,16 +15,21 @@ class UserManager(BaseUserManager):
     def create_user(self, email, password=None, first_name=None, last_name=None, **fields):
         if not email:
             raise ValueError('The Email field must be set')
-        user = self.model(email=self.normalize_email(email),
-                          first_name=first_name, last_name=last_name, **fields)
+        user = self.model(
+            email=self.normalize_email(email), 
+            first_name=first_name, 
+            last_name=last_name, 
+            **fields
+        )
         user.set_password(password)
         user.save()
 
         return user
 
     def create_superuser(self, email, password=None, first_name=None, last_name=None, **fields):
-        return self.create_user(email, password, first_name, last_name, 
-                                is_staff=True, is_superuser=True, **fields)
+        return self.create_user(
+            email, password, first_name, last_name, is_staff=True, is_superuser=True, **fields
+        )
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -45,7 +50,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, verbose_name='Email')
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(
-        default=timezone.now, editable=False, verbose_name='Date Joined')
+        default=timezone.now, editable=False, verbose_name='Date Joined'
+    )
 
     objects = UserManager()
     USERNAME_FIELD = 'email'

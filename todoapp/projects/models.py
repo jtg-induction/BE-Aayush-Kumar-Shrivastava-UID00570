@@ -26,7 +26,8 @@ class Project(models.Model):
         (2, 'Completed'),
     ]
     status = models.IntegerField(
-        choices=STATUS_CHOICES, default=0, verbose_name='Status')
+        choices=STATUS_CHOICES, default=0, verbose_name='Status'
+    )
 
     def __str__(self):
         return self.name
@@ -42,9 +43,11 @@ class ProjectMember(models.Model):
     Add string representation for this model with project name and user email/first name.
     """
     project = models.ForeignKey(
-        Project, on_delete=models.CASCADE, verbose_name='Project')
+        Project, on_delete=models.CASCADE, verbose_name='Project'
+    )
     member = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Member')
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Member'
+    )
 
     class Meta:
         unique_together = ('project', 'member')
