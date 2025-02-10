@@ -23,10 +23,12 @@ class Todo(models.Model):
     )
     name = models.CharField(max_length=1000, verbose_name='Todo Name')
     done = models.BooleanField(default=False, verbose_name='Done')
-    date_created = models.DateTimeField(auto_now_add=True, editable=False, 
-                                        verbose_name='Date Created')
-    date_completed = models.DateTimeField(null=True, blank=True, 
-                                          editable=False, verbose_name='Date Completed') 
+    date_created = models.DateTimeField(
+        auto_now_add=True, editable=False, verbose_name='Date Created'
+    )
+    date_completed = models.DateTimeField(
+        null=True, blank=True, editable=False, verbose_name='Date Completed'
+    ) 
     
     def save(self, *args, **kwargs):
         if(self.done==True):

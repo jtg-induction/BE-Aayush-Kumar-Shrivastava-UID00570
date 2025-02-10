@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate
 
-from rest_framework import status
+from rest_framework import permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
@@ -20,6 +20,8 @@ class UserRegistrationAPIView(CreateAPIView):
            "token"
          }
     """
+
+    permission_classes = [permissions.AllowAny]
     serializer_class = user_serializers.UserRegistrationSerializer
 
 
@@ -31,24 +33,25 @@ class UserLoginAPIView(APIView):
          }
     """
 
+    permission_classes = [permissions.AllowAny]
+
     def post(self, request):
-        email = request.data['email']
-        password = request.data['password']
+        email = request.data.get('email', None)
+        password = request.data.get('password', None)
 
-        try:
-            user = authenticate(username=email, password=password)
-
-            if user:
-                token, _ = Token.objects.get_or_create(user=user)
-                return Response({"auth_token": token.key}, status=status.HTTP_200_OK)
-            else:
-                return Response(
-                    {"error": "Invalid email or password."},
-                    status=status.HTTP_401_UNAUTHORIZED
-                )
-
-        except Exception as e:
+        if email is None or password is None:
             return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": "Please provide both email and password."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = authenticate(username=email, password=password)
+
+        if user:
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({"auth_token": token.key}, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {"error": "Invalid email or password."},
+                status=status.HTTP_400_BAD_REQUEST
             )
