@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from .models import Todo
-from users.models import CustomUser
 
 
 class TodoSerializer(serializers.ModelSerializer):
@@ -44,17 +43,16 @@ class TodosWithinDateRangeSerializer(serializers.ModelSerializer):
 
 
 class TodoAPICreateSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(read_only=True)
-    done = serializers.BooleanField(read_only=True)
-    date_created = serializers.DateTimeField(read_only=True)
-
     todo = serializers.CharField(source='name', write_only=True)
-    user_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(),
-                                                 source='user', write_only=True)
 
     class Meta:
         model = Todo
-        fields = ['user_id', 'todo', 'name', 'done', 'date_created']
+        fields = ['todo', 'name', 'done', 'date_created']
+        read_only_fields = ['name', 'done', 'date_created']
+
+    def create(self, validated_data):
+        validated_data['user_id'] = self.context['request'].user.id
+        return super().create(validated_data)
 
 
 class TodoAPIResponseSerializer(serializers.ModelSerializer):
