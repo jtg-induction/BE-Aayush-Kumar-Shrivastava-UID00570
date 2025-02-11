@@ -18,8 +18,10 @@ class UserTodoStatsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'first_name', 'last_name',
-                  'email', 'completed_count', 'pending_count']
+        fields = [
+            'id', 'first_name', 'last_name',
+            'email', 'completed_count', 'pending_count'
+        ]
 
 
 class PendingTodosSerializer(serializers.ModelSerializer):
@@ -37,5 +39,7 @@ class UserWiseProjectStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'to_do_projects',
-                  'in_progress_projects', 'completed_projects']
+        fields = [
+            'first_name', 'last_name', 'email', 'to_do_projects',
+            'in_progress_projects', 'completed_projects'
+        ]

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Project
-
+from users import serializers as user_serializers
 
 class ProjectSerializer(serializers.ModelSerializer):
     existing_member_count = serializers.IntegerField()
@@ -11,27 +11,23 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'name', 'status',
-                  'existing_member_count', 'max_members']
+        fields = [
+            'id', 'name', 'status', 'existing_member_count', 'max_members'
+        ]
 
 
 class ProjectReportSerializer(serializers.ModelSerializer):
     project_title = serializers.CharField(source='name')
-    report = serializers.SerializerMethodField()
+    report = serializers.SerializerMethodField(source='reports')
 
     def get_report(self, obj):
-        user_reports = []
-        for user in obj.reports:
-            user_report = {
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'email': user.email,
-                'pending_count': user.pending_count,
-                'completed_count': user.completed_count
-            }
-            user_reports.append(user_report)
-        return user_reports
-
+        reports =  user_serializers.UserTodoStatsSerializer(obj.reports, many=True, context={"exclude_id": True}).data
+        
+        for report in reports:
+            report.pop('id', None)
+            
+        return reports 
+    
     class Meta:
         model = Project
         fields = ['project_title', 'report']
