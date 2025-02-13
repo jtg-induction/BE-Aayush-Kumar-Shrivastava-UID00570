@@ -7,40 +7,8 @@ from users import models as user_models
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = user_models.CustomUser
+        model = user_models.CustomUser
         fields = ['id', 'first_name', 'last_name', 'email']
-
-
-class UserTodoStatsSerializer(serializers.ModelSerializer):
-    completed_count = serializers.IntegerField()
-    pending_count = serializers.IntegerField()
-
-    class Meta:
-        model = user_models.CustomUser
-        fields = [
-            'id', 'first_name', 'last_name', 'email', 
-            'completed_count', 'pending_count'
-        ]
-
-
-class PendingTodosSerializer(serializers.ModelSerializer):
-    pending_count = serializers.IntegerField()
-
-    class Meta:
-        model = user_models.CustomUser
-        fields = ['id', 'first_name', 'last_name', 'email', 'pending_count']
-
-
-class UserWiseProjectStatusSerializer(serializers.ModelSerializer):
-    to_do_projects = serializers.ListField()
-    in_progress_projects = serializers.ListField()
-    completed_projects = serializers.ListField()
-
-    class Meta:
-        model = user_models.CustomUser
-        fields = [
-            'first_name', 'last_name', 'email', 'to_do_projects', 
-            'in_progress_projects', 'completed_projects'
-        ]
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
