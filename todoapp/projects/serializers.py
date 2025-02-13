@@ -1,6 +1,9 @@
 from rest_framework import serializers
-from .models import Project
-from users import serializers as user_serializers
+
+from projects import models as project_models
+from todos import serializers as todo_serializers 
+from users import models as user_models
+
 
 class ProjectSerializer(serializers.ModelSerializer):
     existing_member_count = serializers.IntegerField()
@@ -10,7 +13,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         return obj.STATUS_CHOICES[obj.status][1]
 
     class Meta:
-        model = Project
+        model = project_models.Project
         fields = [
             'id', 'name', 'status', 'existing_member_count', 'max_members'
         ]
@@ -18,18 +21,10 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class ProjectReportSerializer(serializers.ModelSerializer):
     project_title = serializers.CharField(source='name')
-    report = serializers.SerializerMethodField(source='reports')
-
-    def get_report(self, obj):
-        reports =  user_serializers.UserTodoStatsSerializer(obj.reports, many=True, context={"exclude_id": True}).data
-        
-        for report in reports:
-            report.pop('id', None)
-            
-        return reports 
+    report = todo_serializers.UserTodoReportSerializer(source='reports', many=True)
     
     class Meta:
-        model = Project
+        model = project_models.Project
         fields = ['project_title', 'report']
 
 
@@ -41,5 +36,18 @@ class ProjectWithMemberNameSerializer(serializers.ModelSerializer):
         return True if obj.status == 2 else False
 
     class Meta:
-        model = Project
+        model = project_models.Project
         fields = ['project_name', 'done', 'max_members']
+
+
+class UserWiseProjectStatusSerializer(serializers.ModelSerializer):
+    to_do_projects = serializers.ListField()
+    in_progress_projects = serializers.ListField()
+    completed_projects = serializers.ListField()
+
+    class Meta:
+        model = user_models.CustomUser
+        fields = [
+            'first_name', 'last_name', 'email', 'to_do_projects',
+            'in_progress_projects', 'completed_projects'
+        ]
