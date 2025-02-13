@@ -81,11 +81,13 @@ class TodoAPICreateSerializer(serializers.ModelSerializer):
     date_created = serializers.DateTimeField(read_only=True)
 
     todo = serializers.CharField(source='name', write_only=True)
-    user_id = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(),
-                                                 source='user', write_only=True)
+    user_id = serializers.PrimaryKeyRelatedField(
+        queryset = user_models.CustomUser.objects.all(),
+        source='user', write_only=True
+    )
 
     class Meta:
-        model = Todo
+        model = todo_models.Todo
         fields = ['user_id', 'todo', 'name', 'done', 'date_created']
 
 
@@ -94,5 +96,5 @@ class TodoAPIResponseSerializer(serializers.ModelSerializer):
     todo = serializers.CharField(source='name')
 
     class Meta:
-        model = Todo
+        model = todo_models.Todo
         fields = ['todo_id', 'todo', 'done']

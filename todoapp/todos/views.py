@@ -1,7 +1,9 @@
 from rest_framework.viewsets import ModelViewSet 
 
-from .models import Todo
-from .serializers import TodoAPICreateSerializer, TodoAPIResponseSerializer
+from todos import (
+  models as todo_models,
+  serializers as todo_serializers
+)
 
 
 class TodoAPIViewSet(ModelViewSet):
@@ -24,20 +26,13 @@ class TodoAPIViewSet(ModelViewSet):
        ]
     """
 
-    queryset = Todo.objects.all()
-    serializer_class = TodoAPICreateSerializer
+    serializer_class = todo_serializers.TodoAPICreateSerializer
 
     def get_queryset(self):
-        user_id = self.request.query_params.get('user_id', None)
-        queryset = None
-        if user_id is not None:
-            queryset = Todo.objects.filter(user__id=user_id)
-        else:
-            queryset = Todo.objects.all()
-
+        queryset = todo_models.Todo.objects.filter(user=self.request.user)
         return queryset
 
     def get_serializer_class(self):
-        if self.action == 'create':
-            return TodoAPICreateSerializer
-        return TodoAPIResponseSerializer
+        if self.request.method == "POST":
+            return todo_serializers.TodoAPICreateSerializer
+        return todo_serializers.TodoAPIResponseSerializer
