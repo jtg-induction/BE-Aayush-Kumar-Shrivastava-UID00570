@@ -26,8 +26,6 @@ class TodoAPIViewSet(ModelViewSet):
        ]
     """
 
-    serializer_class = todo_serializers.TodoAPICreateSerializer
-
     def get_queryset(self):
         queryset = todo_models.Todo.objects.filter(user=self.request.user)
         return queryset
