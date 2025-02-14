@@ -50,13 +50,18 @@ class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField(write_only=True)
     password = serializers.CharField(write_only=True)
 
-    def validate(self, attrs):
-        email = attrs.get('email', None)
-        password = attrs.get('password', None)
-
+    def validate(self, validated_data):
+        email = validated_data.get('email', None)
+        password = validated_data.get('password', None)
+        
         user = authenticate(username=email, password=password)
-        if user is None:
-            raise serializers.ValidationError({"error": "Invalid email or password."}, code=status.HTTP_400_BAD_REQUEST)
 
-        return attrs
+        if user is None:
+            raise serializers.ValidationError(
+                {"error": "Invalid email or password."},
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        
+        validated_data['user'] = user
+        return validated_data
     
