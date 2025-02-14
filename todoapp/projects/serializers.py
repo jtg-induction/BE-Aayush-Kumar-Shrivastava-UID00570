@@ -3,6 +3,7 @@ from django.contrib.postgres.aggregates import ArrayAgg
 from rest_framework import serializers
 
 from projects import models as project_models
+from todos import serializers as todo_serializers 
 from users import models as user_models
 
 
@@ -15,27 +16,15 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = project_models.Project
-        fields = ['id', 'name', 'status',
-                  'existing_member_count', 'max_members']
+        fields = [
+            'id', 'name', 'status', 'existing_member_count', 'max_members'
+        ]
 
 
 class ProjectReportSerializer(serializers.ModelSerializer):
     project_title = serializers.CharField(source='name')
-    report = serializers.SerializerMethodField()
-
-    def get_report(self, obj):
-        user_reports = []
-        for user in obj.reports:
-            user_report = {
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'email': user.email,
-                'pending_count': user.pending_count,
-                'completed_count': user.completed_count
-            }
-            user_reports.append(user_report)
-        return user_reports
-
+    report = todo_serializers.UserTodoReportSerializer(source='reports', many=True)
+    
     class Meta:
         model = project_models.Project
         fields = ['project_title', 'report']
@@ -51,6 +40,19 @@ class ProjectWithMemberNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = project_models.Project
         fields = ['project_name', 'done', 'max_members']
+
+
+class UserWiseProjectStatusSerializer(serializers.ModelSerializer):
+    to_do_projects = serializers.ListField()
+    in_progress_projects = serializers.ListField()
+    completed_projects = serializers.ListField()
+
+    class Meta:
+        model = user_models.CustomUser
+        fields = [
+            'first_name', 'last_name', 'email', 'to_do_projects',
+            'in_progress_projects', 'completed_projects'
+        ]
 
 
 class MembersViewSetSerializer(serializers.ModelSerializer):
