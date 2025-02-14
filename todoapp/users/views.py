@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from django.contrib.auth.views import LoginView
 
 from rest_framework import permissions, status
 from rest_framework.authtoken.models import Token
@@ -21,7 +22,7 @@ class UserRegistrationAPIView(CreateAPIView):
          }
     """
 
-    permission_classes = [permissions.AllowAny]
+    permission_classes = []
     serializer_class = user_serializers.UserRegistrationSerializer
 
 
@@ -33,25 +34,14 @@ class UserLoginAPIView(APIView):
          }
     """
 
-    permission_classes = [permissions.AllowAny]
-
+    permission_classes = []
+    serializer_class = user_serializers.UserLoginSerializer
+    
     def post(self, request):
-        email = request.data.get('email', None)
-        password = request.data.get('password', None)
-
-        if email is None or password is None:
-            return Response(
-                {"error": "Please provide both email and password."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        user = authenticate(username=email, password=password)
-
-        if user:
-            token, _ = Token.objects.get_or_create(user=user)
-            return Response({"auth_token": token.key}, status=status.HTTP_200_OK)
-        else:
-            return Response(
-                {"error": "Invalid email or password."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        serializer = user_serializers.UserLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        user = serializer.validated_data['user']
+        token, _ = Token.objects.get_or_create(user=user)
+        
+        return Response({"auth_token": token.key}, status=status.HTTP_200_OK)

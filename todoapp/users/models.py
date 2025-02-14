@@ -12,7 +12,7 @@ class UserManager(BaseUserManager):
     Add manager methods here to create user and super user
     """
 
-    def create_user(self, email, password=None, first_name=None, last_name=None, **fields):
+    def create(self, email, password=None, first_name=None, last_name=None, **fields):
         if not email:
             raise ValueError('The Email field must be set')
         user = self.model(

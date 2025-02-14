@@ -1,3 +1,5 @@
+from django.contrib.auth import authenticate
+
 from rest_framework import serializers, status
 from rest_framework.authtoken.models import Token
 
@@ -7,61 +9,26 @@ from users import models as user_models
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = user_models.CustomUser
+        model = user_models.CustomUser
         fields = ['id', 'first_name', 'last_name', 'email']
-
-
-class UserTodoStatsSerializer(serializers.ModelSerializer):
-    completed_count = serializers.IntegerField()
-    pending_count = serializers.IntegerField()
-
-    class Meta:
-        model = user_models.CustomUser
-        fields = [
-            'id', 'first_name', 'last_name', 'email', 
-            'completed_count', 'pending_count'
-        ]
-
-
-class PendingTodosSerializer(serializers.ModelSerializer):
-    pending_count = serializers.IntegerField()
-
-    class Meta:
-        model = user_models.CustomUser
-        fields = ['id', 'first_name', 'last_name', 'email', 'pending_count']
-
-
-class UserWiseProjectStatusSerializer(serializers.ModelSerializer):
-    to_do_projects = serializers.ListField()
-    in_progress_projects = serializers.ListField()
-    completed_projects = serializers.ListField()
-
-    class Meta:
-        model = user_models.CustomUser
-        fields = [
-            'first_name', 'last_name', 'email', 'to_do_projects', 
-            'in_progress_projects', 'completed_projects'
-        ]
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-
+    token = serializers.SerializerMethodField()
+    
     class Meta:
         model = user_models.CustomUser
         fields = [
-            'first_name', 'last_name', 'email', 'password', 'date_joined'
+            'first_name', 'last_name', 'email', 'password', 'date_joined', 'token'
         ]
-        read_only_fields = ['date_joined']
-
-    def validate_email(self, value):
-        if user_models.CustomUser.objects.filter(email=value).exists():
-            raise serializers.ValidationError(
-                {"email":"Email already exists"}, 
-                code=status.HTTP_201_CREATED
-            )
-
-        return value
-
+        read_only_fields = ['date_joined', 'token']
+        
+    def get_token(self, instance): 
+        token, _ = Token.objects.get_or_create(user=instance)
+        
+        return token.key
+        
     def validate(self, attrs):
         confirm_password = self.context['request'].data.get(
             'confirm_password', None)
@@ -78,19 +45,23 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         return attrs
 
-    def create(self, validated_data):
-        user = user_models.CustomUser.objects.create_user(
-            email=validated_data['email'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-            password=validated_data['password']
-        )
 
-        return user
+class UserLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField(write_only=True)
+    password = serializers.CharField(write_only=True)
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        token, _ = Token.objects.get_or_create(user=instance)
-        representation['token'] = token.key
+    def validate(self, validated_data):
+        email = validated_data.get('email', None)
+        password = validated_data.get('password', None)
+        
+        user = authenticate(username=email, password=password)
 
-        return representation
+        if user is None:
+            raise serializers.ValidationError(
+                {"error": "Invalid email or password."},
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        
+        validated_data['user'] = user
+        return validated_data
+    
