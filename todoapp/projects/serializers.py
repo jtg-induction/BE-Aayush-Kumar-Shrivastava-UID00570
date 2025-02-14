@@ -20,7 +20,6 @@ class ProjectSerializer(serializers.ModelSerializer):
             'id', 'name', 'status', 'existing_member_count', 'max_members'
         ]
 
-
 class ProjectReportSerializer(serializers.ModelSerializer):
     project_title = serializers.CharField(source='name')
     report = todo_serializers.UserTodoReportSerializer(source='reports', many=True)
@@ -40,20 +39,6 @@ class ProjectWithMemberNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = project_models.Project
         fields = ['project_name', 'done', 'max_members']
-
-
-class UserWiseProjectStatusSerializer(serializers.ModelSerializer):
-    to_do_projects = serializers.ListField()
-    in_progress_projects = serializers.ListField()
-    completed_projects = serializers.ListField()
-
-    class Meta:
-        model = user_models.CustomUser
-        fields = [
-            'first_name', 'last_name', 'email', 'to_do_projects',
-            'in_progress_projects', 'completed_projects'
-        ]
-
 
 class MembersViewSetSerializer(serializers.ModelSerializer):
     user_ids = serializers.PrimaryKeyRelatedField(
@@ -122,3 +107,16 @@ class DefaultProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = project_models.Project
         fields = '__all__'
+
+
+class UserWiseProjectStatusSerializer(serializers.ModelSerializer):
+    to_do_projects = serializers.ListField()
+    in_progress_projects = serializers.ListField()
+    completed_projects = serializers.ListField()
+
+    class Meta:
+        model = user_models.CustomUser
+        fields = [
+            'first_name', 'last_name', 'email', 'to_do_projects',
+            'in_progress_projects', 'completed_projects'
+        ]
