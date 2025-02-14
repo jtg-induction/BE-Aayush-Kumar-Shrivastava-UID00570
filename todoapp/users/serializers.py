@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import make_password
 
 from rest_framework import serializers, status
 from rest_framework.authtoken.models import Token
@@ -29,21 +30,25 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         
         return token.key
         
-    def validate(self, attrs):
+    def validate(self, validated_data):
         confirm_password = self.context['request'].data.get(
-            'confirm_password', None)
+            'confirm_password', None
+        )
+        
         if not confirm_password:
             raise serializers.ValidationError(
                 {"confirm_password": "This field is required."}
             )
 
-        if attrs["password"] != confirm_password:
+        if validated_data["password"] != confirm_password:
             raise serializers.ValidationError(
                 {"confirm_password": "Passwords do not match."}, 
                 code=status.HTTP_400_BAD_REQUEST
             )
-
-        return attrs
+            
+        validated_data['password'] = make_password(validated_data['password'])
+        
+        return validated_data
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -64,4 +69,3 @@ class UserLoginSerializer(serializers.Serializer):
         
         validated_data['user'] = user
         return validated_data
-    
