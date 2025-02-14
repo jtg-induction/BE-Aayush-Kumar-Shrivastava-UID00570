@@ -69,4 +69,3 @@ class UserLoginSerializer(serializers.Serializer):
         
         validated_data['user'] = user
         return validated_data
-    
