@@ -77,14 +77,15 @@ class PendingTodosSerializer(serializers.ModelSerializer):
 
 class TodoAPICreateSerializer(serializers.ModelSerializer):
     todo = serializers.CharField(source='name', write_only=True)
-    user_id = serializers.PrimaryKeyRelatedField(
-        queryset = user_models.CustomUser.objects.all(),
-        source='user', write_only=True
-    )
 
     class Meta:
         model = todo_models.Todo
-        fields = ['user_id', 'todo', 'name', 'done', 'date_created']
+        fields = ['todo', 'name', 'done', 'date_created']
+        read_only_fields = ['name', 'done', 'date_created']
+        
+    def create(self, validated_data):
+        validated_data['user_id'] = self.context['request'].user.id
+        return super().create(validated_data)
 
 
 class TodoAPIResponseSerializer(serializers.ModelSerializer):
