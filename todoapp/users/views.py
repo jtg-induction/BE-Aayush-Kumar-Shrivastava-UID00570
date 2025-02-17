@@ -5,7 +5,7 @@ from rest_framework import permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 
 from users import serializers as user_serializers
 
@@ -26,7 +26,7 @@ class UserRegistrationAPIView(CreateAPIView):
     serializer_class = user_serializers.UserRegistrationSerializer
 
 
-class UserLoginAPIView(APIView):
+class UserLoginAPIView(GenericAPIView):
     """
         success response format
          {
@@ -38,8 +38,13 @@ class UserLoginAPIView(APIView):
     serializer_class = user_serializers.UserLoginSerializer
     
     def post(self, request):
-        serializer = user_serializers.UserLoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        serializer = self.get_serializer(data=request.data)
+        
+        if not serializer.is_valid(raise_exception=True): 
+            raise serializers.ValidationError(
+                {"error": "Invalid credentials."},
+                code=status.HTTP_400_BAD_REQUEST
+              )
         
         user = serializer.validated_data['user']
         token, _ = Token.objects.get_or_create(user=user)
