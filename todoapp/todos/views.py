@@ -1,4 +1,4 @@
-from rest_framework.viewsets import ModelViewSet 
+from rest_framework.viewsets import ModelViewSet
 
 from todos import (
   models as todo_models,
@@ -25,8 +25,6 @@ class TodoAPIViewSet(ModelViewSet):
          }
        ]
     """
-
-    serializer_class = todo_serializers.TodoAPICreateSerializer
 
     def get_queryset(self):
         queryset = todo_models.Todo.objects.filter(user=self.request.user)
