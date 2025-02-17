@@ -40,10 +40,15 @@ class ProjectWithMemberNameSerializer(serializers.ModelSerializer):
         model = project_models.Project
         fields = ['project_name', 'done', 'max_members']
 
-class MembersViewSetSerializer(serializers.ModelSerializer):
+class ProjectMembersUdateViewSerializer(serializers.ModelSerializer):
     user_ids = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=user_models.CustomUser.objects.all(), write_only=True)
-
+        many=True, queryset=user_models.CustomUser.objects.all(), write_only=True
+    )
+    logs = serializers.SerializerMethodField(read_only=True)
+    
+    def get_logs(self, obj):
+        return self.context['logs']
+    
     def update(self, instance, validated_data):
         request = self.context.get('request', None)
 
@@ -92,18 +97,12 @@ class MembersViewSetSerializer(serializers.ModelSerializer):
         self.context['logs'] = logs
         return instance
 
-    def to_representation(self, obj):
-        data = super().to_representation(obj)
-        data['logs'] = self.context.get('logs', {})
-
-        return data
-
     class Meta:
         model = project_models.Project
-        fields = ['user_ids']
+        fields = ['user_ids', 'logs']
 
 
-class DefaultProjectSerializer(serializers.ModelSerializer):
+class ProjectViewSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = project_models.Project
         fields = '__all__'
