@@ -10,7 +10,6 @@ from users import models as user_models
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = user_models.CustomUser
-        model = user_models.CustomUser
         fields = ['id', 'first_name', 'last_name', 'email']
 
 
