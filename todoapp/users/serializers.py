@@ -16,12 +16,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
     token = serializers.SerializerMethodField()
     
     class Meta:
         model = user_models.CustomUser
         fields = [
-            'first_name', 'last_name', 'email', 'password', 'date_joined', 'token'
+            'first_name', 'last_name', 'email', 'password', 'date_joined', 'token', 'confirm_password'
         ]
         read_only_fields = ['date_joined', 'token']
         
@@ -30,36 +31,25 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         
         return token.key
         
-    def validate(self, validated_data):
-        confirm_password = self.context['request'].data.get(
-            'confirm_password', None
-        )
-        
-        if not confirm_password:
-            raise serializers.ValidationError(
-                {"confirm_password": "This field is required."}
-            )
-
-        if validated_data["password"] != confirm_password:
+    def validate(self, attrs):
+        if attrs["password"] != attrs['confirm_password']:
             raise serializers.ValidationError(
                 {"confirm_password": "Passwords do not match."}, 
                 code=status.HTTP_400_BAD_REQUEST
             )
             
-        validated_data['password'] = make_password(validated_data['password'])
+        attrs['password'] = make_password(attrs['password'])
+        attrs.pop('confirm_password')
         
-        return validated_data
+        return attrs
 
 
 class UserLoginSerializer(serializers.Serializer):
-    email = serializers.EmailField(write_only=True)
-    password = serializers.CharField(write_only=True)
+    email = serializers.EmailField(write_only=True, required=True)
+    password = serializers.CharField(write_only=True, required=True)
 
-    def validate(self, validated_data):
-        email = validated_data.get('email', None)
-        password = validated_data.get('password', None)
-        
-        user = authenticate(username=email, password=password)
+    def validate(self, attrs):
+        user = authenticate(username=attrs['email'], password=attrs['password'])
 
         if user is None:
             raise serializers.ValidationError(
@@ -67,5 +57,5 @@ class UserLoginSerializer(serializers.Serializer):
                 code=status.HTTP_400_BAD_REQUEST
             )
         
-        validated_data['user'] = user
-        return validated_data
+        attrs['user'] = user
+        return attrs
