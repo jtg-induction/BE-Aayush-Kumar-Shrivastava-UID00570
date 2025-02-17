@@ -3,7 +3,6 @@ import json
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 
@@ -17,7 +16,9 @@ class UserRegistrationAPIViewTestCase(APITestCase):
         user_data = {
             "email": "test@testuser.com",
             "password": "password",
-            "confirm_password": "INVALID_PASSWORD"
+            "confirm_password": "INVALID_PASSWORD",
+            "first_name": "John",
+            "last_name": "Doe"
         }
         response = self.client.post(self.url, user_data)
         self.assertEqual(400, response.status_code)
@@ -29,7 +30,9 @@ class UserRegistrationAPIViewTestCase(APITestCase):
         user_data = {
             "email": "test@testuser.com",
             "password": "123123",
-            "confirm_password": "123123"
+            "confirm_password": "123123", 
+            "first_name": "John", 
+            "last_name": "Doe"
         }
         response = self.client.post(self.url, user_data)
         self.assertEqual(201, response.status_code)
@@ -42,7 +45,9 @@ class UserRegistrationAPIViewTestCase(APITestCase):
         user_data_1 = {
             "email": "test@testuser.com",
             "password": "123123",
-            "confirm_password": "123123"
+            "confirm_password": "123123", 
+            "first_name": "John", 
+            "last_name": "Doe"
         }
         response = self.client.post(self.url, user_data_1)
         self.assertEqual(201, response.status_code)
@@ -62,7 +67,7 @@ class UserLoginAPIViewTestCase(APITestCase):
     def setUp(self):
         self.email = "john@snow.com"
         self.password = "you_know_nothing"
-        self.user = get_user_model().objects.create_user(self.email, self.password)
+        self.user = get_user_model().objects.create_user(self.email, self.password, first_name="John", last_name="Snow")
 
     def test_authentication_without_password(self):
         response = self.client.post(self.url, {"email": self.email})
