@@ -49,6 +49,6 @@ class ProjectMemberApiViewSet(ModelViewSet):
         action = self.kwargs.get("action")
         
         if action in ["add", "remove"]:
-            return project_serializers.MembersViewSetSerializer
+            return project_serializers.ProjectMembersUdateViewSerializer
         
-        return project_serializers.DefaultProjectSerializer
+        return project_serializers.ProjectViewSetSerializer
